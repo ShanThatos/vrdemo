@@ -6,10 +6,11 @@ format:
 	eslint --ext ts --fix src
 
 m := Updates
+# to use a commit message do make push m="MESSAGE"
 push:
 	git add .
 	git commit -m "$(m)"
-	git push
+	git push -u origin main
 
 run start: format
 	npm run dev
