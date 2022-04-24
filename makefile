@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-DIST_DIR := ./dist/
+DIST_DIR := dist
 
 format:
 	eslint --ext ts --fix src
@@ -17,8 +17,11 @@ run start: format
 build: format
 	npm run build
 
-deploy: build
-	git -C $(DIST_DIR) init
-	git -C $(DIST_DIR) add -A
-	git -C $(DIST_DIR) commit -m "deploy"
-	git -C $(DIST_DIR) push -f https://github.com/ShanThatos/vrdemo.git main:gh-pages
+deploy:
+	-rm -r -Force $(DIST_DIR)
+	$(MAKE) build
+	-git -C $(DIST_DIR) init
+	-git -C $(DIST_DIR) checkout -b main
+	-git -C $(DIST_DIR) add -A
+	-git -C $(DIST_DIR) commit -m "deploy"
+	-git -C $(DIST_DIR) push -f https://github.com/ShanThatos/vrdemo.git main:gh-pages
