@@ -1,0 +1,1 @@
+export type XRRenderingContext = WebGLRenderingContext | WebGL2RenderingContext;
