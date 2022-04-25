@@ -22,14 +22,14 @@ export const setupScene = (gl: XRRenderingContext) => {
             new Vec3([-1, 0, 1])
         ]
     );
+    square.relativeTransform.position = new Vec3([1, .5, 1]);
     square.setupRenderPass(gl);
 
     const animate = new AnimatedEntity();
-    animate.animateFunction = (ae: AnimatedEntity, dt: number) => {
+    animate.animateFunction = (_ae: AnimatedEntity, dt: number) => {
         square.relativeTransform.scale = Vec3.one.copy().scale((Math.sin(Entity.currentTime) * .5 + .5) * .5 + .5);
-        square.relativeTransform.rotation = Quat.fromAxisAngle(new Vec3([0, 1, 0]), dt).multiply(ae.relativeTransform.rotation);
+        square.relativeTransform.rotation = Quat.fromAxisAngle(new Vec3([0, 1, 0]), dt).multiply(square.relativeTransform.rotation);
     };
-    animate.relativeTransform.position = new Vec3([1, .5, 1]);
     animate.addChildEntity(square);
 
     baseEntity.addChildEntity(animate);
