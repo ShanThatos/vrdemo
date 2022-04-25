@@ -1,5 +1,5 @@
 import type { XRFrame, XRReferenceSpace, XRSession, XRWebGLLayer } from "webxr";
-import { renderScene } from "./render/Render";
+import { renderScene, setupScene, updateScene } from "./render/Scene";
 import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
 
@@ -45,13 +45,13 @@ const startXRSession = async () => {
 
     referenceSpace = (await xrsession.requestReferenceSpace("local")) as XRReferenceSpace;
 
+    setupScene(gl);
+
     xrsession.requestAnimationFrame(drawFrame);
 };
 
-// TODO const drawFrame = (time: number, frame: XRFrame) => {
-const drawFrame = (_time: number, frame: XRFrame) => {
-    // TODO physicsUpdate(time);
-    physicsUpdate();
+const drawFrame = (time: number, frame: XRFrame) => {
+    physicsUpdate(time);
     xrsession.requestAnimationFrame(drawFrame);
 
     const pose = frame.getViewerPose(referenceSpace);
@@ -60,6 +60,7 @@ const drawFrame = (_time: number, frame: XRFrame) => {
         const gllayer = xrsession.renderState.baseLayer as XRWebGLLayer;
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, gllayer.framebuffer);
+        gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         for (const view of pose.views) {
@@ -72,9 +73,17 @@ const drawFrame = (_time: number, frame: XRFrame) => {
     }
 };
 
-// TODO const physicsUpdate = (time: number) => {
-const physicsUpdate = () => {
-    // physics update
+let prevUpdateTime = 0;
+const physicsUpdate = (time: number) => {
+    if (prevUpdateTime === 0) {
+        prevUpdateTime = time;
+        return;
+    }
+
+    const delta = (time - prevUpdateTime) / 1000.0;
+    prevUpdateTime = time;
+
+    updateScene(time / 1000.0, delta);
 };
 
 
