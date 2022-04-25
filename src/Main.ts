@@ -1,44 +1,40 @@
 import type { XRFrame, XRReferenceSpace, XRSession, XRWebGLLayer } from "webxr";
 import { renderScene } from "./render/Render";
+import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
 
-
 const windowany = window as any;
+const statusElement = getElement("statusMessage");
 
 let xrsession: XRSession;
 let baseCanvas: HTMLCanvasElement;
 let gl: XRRenderingContext;
 let referenceSpace: XRReferenceSpace;
 
-const start = async () => {
+const startXRSession = async () => {
     let txr;
     {
         txr = windowany.navigator.xr;
-        if (!txr)
+        if (!txr) {
+            alert("WebXR not supported, using polyfill");
             txr = new windowany.WebXRPolyfill();
+        }
     }
     const xr = txr;
 
     const isImmersiveVR = await xr.isSessionSupported("immersive-vr");
 
-    if (!isImmersiveVR) {
-        console.log("No immersive-vr support");
-        alert("No immersive-vr support");
-        return;
-    }
+    if (!isImmersiveVR) throw new Error("No immersive-vr support");
 
     xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: ["local"] });
     xrsession.addEventListener("end", () => {
         alert("XR Session has ended");
     });
 
-    baseCanvas = document.getElementById("glCanvas") as HTMLCanvasElement;
+    baseCanvas = getElement<HTMLCanvasElement>("glCanvas");
     const tgl = baseCanvas.getContext("webgl", { xrCompatible: true });
-    if (!tgl) {
-        console.log("No WebGL support");
-        alert("No WebGL support");
-        return;
-    }
+    if (!tgl) throw new Error("No WebGL support");
+    
     gl = tgl as XRRenderingContext;
 
     xrsession.updateRenderState({
@@ -81,5 +77,14 @@ const physicsUpdate = () => {
     // physics update
 };
 
-start();
-export { };
+
+export const init = () => {
+    startXRSession()
+        .catch(err => {
+            statusElement.innerHTML += err;
+        });
+};
+
+window.onload = () => {
+    getElement("startButton").addEventListener("click", init);
+};
