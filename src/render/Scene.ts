@@ -1,7 +1,7 @@
 import type { XRView } from "webxr";
 import { Quat, Vec3 } from "../../lib/TSM";
 import { XRRenderingContext } from "../utils/Types";
-import { AnimatedEntity } from "./entity/Animate";
+import { animateEntity } from "./entity/Animate";
 import { Entity } from "./entity/Entity";
 import { RenderEntity } from "./entity/RenderEntity";
 import { WebGLUtilities } from "./webgl/WebGLUtilities";
@@ -22,18 +22,15 @@ export const setupScene = (gl: XRRenderingContext) => {
             new Vec3([-1, 0, 1])
         ]
     );
-    square.relativeTransform.position = new Vec3([1, .5, 1]);
+    square.transform.position = new Vec3([1, .5, 1]);
     square.setupRenderPass(gl);
 
-    const animate = new AnimatedEntity();
-    animate.animateFunction = (_ae: AnimatedEntity, dt: number) => {
-        square.relativeTransform.scale = Vec3.one.copy().scale((Math.sin(Entity.currentTime) * .5 + .5) * .5 + .5);
-        square.relativeTransform.rotation = Quat.fromAxisAngle(new Vec3([0, 1, 0]), dt).multiply(square.relativeTransform.rotation);
-    };
-    animate.addChildEntity(square);
+    animateEntity(square, (e: Entity, dt: number) => {
+        e.transform.scale = Vec3.one.copy().scale((Math.sin(Entity.currentTime) * .5 + .5) * .5 + .5);
+        e.transform.rotation = Quat.fromAxisAngle(new Vec3([0, 1, 0]), dt).multiply(square.transform.rotation);
+    });
 
-    baseEntity.addChildEntity(animate);
-    baseEntity.relativeTransform.scale = Vec3.one.copy().scale(.5);
+    baseEntity.addChildEntity(square);
 };
 
 export const renderScene = (_gl: WebGLRenderingContext, view: XRView) => {

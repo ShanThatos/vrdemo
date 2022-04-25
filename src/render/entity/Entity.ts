@@ -19,6 +19,8 @@ export class Entity {
 
     private childEntities: Entity[] = [];
 
+    // public entityData: Map<string, any> = new Map<string, any>();
+
     constructor() {
         this._relativeTransform.bindOnChange(() => this._needToUpdateTransform = true);
     }
@@ -65,7 +67,7 @@ export class Entity {
 
     public get globalTransform(): Mat4 {
         if (this._needToUpdateTransform)
-            throw new Error("Global transform not updated");
+            this.updateTransforms();
         return this._globalTransform.copy();
     }
     public get relativeTransform(): Transform { return this._relativeTransform; }
@@ -74,4 +76,7 @@ export class Entity {
         this._relativeTransform.bindOnChange(() => this._needToUpdateTransform = true);
         this._needToUpdateTransform = true;
     }
+
+    public get transform(): Transform { return this.relativeTransform; }
+    public set transform(value: Transform) { this.relativeTransform = value; }
 }

@@ -1,7 +1,7 @@
 import { Vec3 } from "../../../lib/TSM";
 import { Nullable, XRRenderingContext } from "../../utils/Types";
 import { enforceDefined } from "../../utils/Utils";
-import { FS_green, VS_verts } from "../shaders/shadercode/shadercode";
+import { FS_green, VS_verts } from "../shaders/shaders";
 import { RenderPass } from "../webgl/RenderPass";
 import { Entity } from "./Entity";
 
