@@ -6,14 +6,11 @@ import { BaseEntity, Entity } from "./entity/Entity";
 import { AmbientLightEntity, DirectionalLightEntity, PointLightEntity } from "./entity/LightEntity";
 import { useAlbedo, useFlag } from "./entity/RenderEntity";
 import { loadSolid } from "./entity/solids/Solids";
-import { FS_generic } from "./shaders/shaders";
 import { WebGLUtilities } from "./webgl/WebGLUtilities";
 
 const baseEntity = new BaseEntity();
 
 export const setupScene = (gl: XRRenderingContext) => {
-    console.log(FS_generic);
-
     WebGLUtilities.requestIntIndicesExt(gl);
     Entity.extVAO = WebGLUtilities.requestVAOExt(gl);
 
