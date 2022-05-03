@@ -39,7 +39,7 @@ const startXRSession = async () => {
 
     xrsession.updateRenderState({
         baseLayer: new windowany.XRWebGLLayer(xrsession, gl),
-        depthFar: 40,
+        depthFar: 100,
         depthNear: .1,
     });
 
@@ -62,6 +62,12 @@ const drawFrame = (time: number, frame: XRFrame) => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, gllayer.framebuffer);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        gl.enable(gl.DEPTH_TEST);
+
+        gl.enable(gl.CULL_FACE);
+        gl.frontFace(gl.CCW);
+        gl.cullFace(gl.BACK);
 
         for (const view of pose.views) {
             const vp = gllayer.getViewport(view);
@@ -90,6 +96,7 @@ const physicsUpdate = (time: number) => {
 export const init = () => {
     startXRSession()
         .catch(err => {
+            console.log(err);
             statusElement.innerHTML += err;
         });
 };

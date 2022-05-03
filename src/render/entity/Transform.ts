@@ -13,6 +13,11 @@ export class Transform {
         this._onChange = callback;
     }
 
+    private tryOnChange() {
+        if (this._onChange !== null)
+            this._onChange();
+    }
+
     public getTransformMatrix(): Mat4 {
         const T = Mat4.identity.copy().translate(this.position);
         const R = this.rotation.toMat4();
@@ -23,20 +28,20 @@ export class Transform {
     public get position() { return this._position.copy(); }
     public set position(value: Vec3) {
         this._position = value.copy();
-        if (this._onChange !== null)
-            this._onChange();
+        this.tryOnChange();
     }
     public get scale() { return this._scale.copy(); }
     public set scale(value: Vec3) {
         this._scale = value.copy();
-        if (this._onChange !== null)
-            this._onChange();
+        this.tryOnChange();
     }
     public get rotation() { return this._rotation.copy(); }
     public set rotation(value: Quat) {
         this._rotation = value.copy();
-        if (this._onChange !== null)
-            this._onChange();
+        this.tryOnChange();
+    }
+    public rotate(q: Quat) {
+        this.rotation = q.copy().multiply(this.rotation);
     }
 
     public copy(): Transform {

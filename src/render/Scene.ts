@@ -1,84 +1,76 @@
 import type { XRView } from "webxr";
-import { Quat, Vec3 } from "../../lib/TSM";
+import { Vec3 } from "../../lib/TSM";
 import { XRRenderingContext } from "../utils/Types";
-import { animateEntity } from "./entity/Animate";
-import { Entity } from "./entity/Entity";
-import { RenderEntity } from "./entity/RenderEntity";
+import { animateEntity, simpleRotationAnimation } from "./entity/Animate";
+import { BaseEntity, Entity } from "./entity/Entity";
+import { AmbientLightEntity, DirectionalLightEntity, PointLightEntity } from "./entity/LightEntity";
+import { useAlbedo, useFlag } from "./entity/RenderEntity";
+import { loadSolid } from "./entity/solids/Solids";
+import { FS_generic } from "./shaders/shaders";
 import { WebGLUtilities } from "./webgl/WebGLUtilities";
 
-const baseEntity = new Entity();
+const baseEntity = new BaseEntity();
 
 export const setupScene = (gl: XRRenderingContext) => {
+    console.log(FS_generic);
+
     WebGLUtilities.requestIntIndicesExt(gl);
     Entity.extVAO = WebGLUtilities.requestVAOExt(gl);
 
-    const square = new RenderEntity();
-    square.setDrawData(
-        [0, 1, 2, 2, 3, 0], 
-        [
-            new Vec3([-1, 0, -1]), 
-            new Vec3([1, 0, -1]),
-            new Vec3([1, 0, 1]),
-            new Vec3([-1, 0, 1])
-        ]
-    );
-    square.transform.position = new Vec3([1, .5, 1]);
-    square.setupRenderPass(gl);
+    const cube = loadSolid("cube");
+    cube.transform.position = new Vec3([0, 1, 0]);
+    useAlbedo(cube, [1, 1, 1, 1]);
+    useFlag(cube, "lighting");
+    animateEntity(cube, simpleRotationAnimation({ speed: 2 }));
+    baseEntity.addChildEntity(cube);
 
-    animateEntity(square, (e: Entity, dt: number) => {
-        e.transform.scale = Vec3.one.copy().scale((Math.sin(Entity.currentTime) * .5 + .5) * .5 + .5);
-        e.transform.rotation = Quat.fromAxisAngle(new Vec3([0, 1, 0]), dt).multiply(square.transform.rotation);
+    const floor = loadSolid("cube");
+    floor.transform.scale = new Vec3([100, 1, 100]);
+    useAlbedo(floor, [.8, .8, .8, 1]);
+    useFlag(floor, "lighting");
+    baseEntity.addChildEntity(floor);
+
+    baseEntity.addChildEntity(new AmbientLightEntity(new Vec3([1, 1, 1]).scale(0.1)));
+    
+    const redPointLight = new PointLightEntity({ color: new Vec3([1, 0, 0]) });
+    redPointLight.transform.position = new Vec3([4, 5, 4]);
+    animateEntity(redPointLight, (e, time, _dt) => {
+        const mul = (Math.sin(time / 2)) * 2;
+        e.transform.position = new Vec3([mul * 4, 5, mul * 4]);
     });
+    baseEntity.addChildEntity(redPointLight);
 
-    baseEntity.addChildEntity(square);
+    const bluePointLight = new PointLightEntity({ color: new Vec3([0, 0, 1]) });
+    bluePointLight.transform.position = new Vec3([-4, 5, 4]);
+    animateEntity(bluePointLight, (e, time, _dt) => {
+        const mul = (Math.sin(time / 2)) * 2;
+        e.transform.position = new Vec3([mul * -4, 5, mul * 4]);
+    });
+    baseEntity.addChildEntity(bluePointLight);
+
+    const greenPointLight = new PointLightEntity({ color: new Vec3([0, 1, 0]) });
+    greenPointLight.transform.position = new Vec3([0, 5, -3]);
+    animateEntity(greenPointLight, (e, time, _dt) => {
+        const mul = (Math.sin(time / 2)) * 2;
+        e.transform.position = new Vec3([0, 5, mul * -4]);
+    });
+    baseEntity.addChildEntity(greenPointLight);
+
+    const dirLight = new DirectionalLightEntity({ direction: new Vec3([-1, -1, 1]), intensity: 0.2 });
+    baseEntity.addChildEntity(dirLight);
+
+    baseEntity.setup(gl);
 };
 
 export const renderScene = (_gl: WebGLRenderingContext, view: XRView) => {
     Entity.projectionMatrix = view.projectionMatrix;
     Entity.viewMatrix = view.transform.inverse.matrix;
+    Entity.viewPos = new Float32Array([view.transform.position.x, view.transform.position.y, view.transform.position.z]);
 
     baseEntity.render();
-
-    // const program = setupScene(gl);
-
-    // gl.useProgram(program);
-
-    // const uProj = gl.getUniformLocation(program, "projection");
-    // const uView = gl.getUniformLocation(program, "view");
-
-    // gl.uniformMatrix4fv(uProj, false, projMatrix);
-    // // gl.uniformMatrix4fv(uProj, false, new Float32Array(Mat4.identity.all()));
-    // gl.uniformMatrix4fv(uView, false, viewMatrix);
-    // // gl.uniformMatrix4fv(uView, false, new Mat4(Array.from(viewMatrix.values())).inverse().all());
-
-
-    // const attrVertex = gl.getAttribLocation(program, "vertex");
-    // gl.enableVertexAttribArray(attrVertex);
-    // gl.vertexAttribPointer(attrVertex, 3, gl.FLOAT, false, 0, 0);
-
-
-    // gl.drawArrays(gl.TRIANGLES, 0, 6);
 };
 
 export const updateScene = (time: number, dt: number) => {
     Entity.currentTime = time;
     baseEntity.updateEntity(dt);
 };
-
-// let setupDone = false;
-// let program: WebGLProgram;
-// const setupScene = (gl: XRRenderingContext) => {
-//     if (setupDone) return program;
-
-//     program = WebGLUtilities.createShaderProgram(gl, VS_verts, FS_red);
-
-//     const bf = enforceDefined(gl.createBuffer());
-//     gl.bindBuffer(gl.ARRAY_BUFFER, bf);
-//     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-//         [-.5, -.5, -1], [-.5, .5, -1], [.5, .5, -1],
-//         [-.5, -.5, -1], [.5, .5, -1], [.5, -.5, -1]
-//     ].flat(1)), gl.STATIC_DRAW);
-
-//     setupDone = true;
-//     return program;
-// };

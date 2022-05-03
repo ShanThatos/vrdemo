@@ -1,5 +1,7 @@
 import { Mat4 } from "../../../lib/TSM";
 import { Nullable } from "../../utils/Types";
+import { enforceDefined } from "../../utils/Utils";
+import { LightEntity } from "./LightEntity";
 import { Transform } from "./Transform";
 
 export class Entity {
@@ -7,11 +9,14 @@ export class Entity {
     public static extVAO: OES_vertex_array_object;
     public static projectionMatrix: Float32Array = new Float32Array(Mat4.identity.all());
     public static viewMatrix: Float32Array = new Float32Array(Mat4.identity.all());
+    public static viewPos: Float32Array = new Float32Array([0, 0, 0]);
     public static currentTime: number;
     private static entityIdCounter = 0;
 
     public readonly id: number = Entity.entityIdCounter++;
     
+
+    protected baseEntity: Nullable<BaseEntity> = null;
     private parentEntity: Nullable<Entity> = null;
     private _globalTransform: Mat4 = Mat4.identity.copy();
     private _relativeTransform: Transform = new Transform();
@@ -19,7 +24,7 @@ export class Entity {
 
     private childEntities: Entity[] = [];
 
-    // public entityData: Map<string, any> = new Map<string, any>();
+    public entityData: Map<string, any> = new Map<string, any>();
 
     constructor() {
         this._relativeTransform.bindOnChange(() => this._needToUpdateTransform = true);
@@ -29,6 +34,10 @@ export class Entity {
         if (this._needToUpdateTransform)
             this.updateTransforms();
         this.childEntities.forEach(e => e.updateEntity(dt));
+    }
+
+    public setup(gl: RenderingContext): void {
+        this.childEntities.forEach(e => e.setup(gl));
     }
 
     public render(): void {
@@ -48,7 +57,12 @@ export class Entity {
     public addChildEntity(entity: Entity): void {
         this.childEntities.push(entity);
         entity.parentEntity = this;
+        entity._onAdd();
     }
+    public _onAdd(): void {
+        this.baseEntity = enforceDefined(this.parentEntity).baseEntity;
+    }
+
     public removeChildEntityById(id: number, complain = true): Entity | null {
         const index = this.childEntities.findIndex(e => e.id === id);
         if (index === -1) {
@@ -59,10 +73,14 @@ export class Entity {
         const entity = this.childEntities[index];
         this.childEntities.splice(index, 1);
         entity.parentEntity = null;
+        entity._onRemove();
         return entity;
     }
     public removeChildEntity(entity: Entity, complain = true): Entity | null {
         return this.removeChildEntityById(entity.id, complain);
+    }
+    public _onRemove(): void {
+        this.baseEntity = null;
     }
 
     public get globalTransform(): Mat4 {
@@ -79,4 +97,25 @@ export class Entity {
 
     public get transform(): Transform { return this.relativeTransform; }
     public set transform(value: Transform) { this.relativeTransform = value; }
+}
+
+
+export class BaseEntity extends Entity {
+
+    public lights: LightEntity[] = [];
+
+    constructor() {
+        super();
+        this.baseEntity = this;
+    }
+
+    public getLightPositions(): Float32Array {
+        return new Float32Array(this.lights.flatMap(l => l.lightPosition.xyz));
+    }
+    public getLightColors(): Float32Array {
+        return new Float32Array(this.lights.flatMap(l => l.lightColor.xyz));
+    }
+    public getLightInfos(): Float32Array {
+        return new Float32Array(this.lights.flatMap(l => l.lightInfo.xyzw));
+    }
 }
