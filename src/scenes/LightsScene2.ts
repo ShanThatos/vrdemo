@@ -10,7 +10,7 @@ const setupScene = (): Entity => {
 
     const cube = loadSolid("cube");
     cube.transform.position = new Vec3([0, 1, -1]);
-    cube.transform.scale = Vec3.one.copy().scale(0.5);
+    cube.transform.scale = Vec3.one.copy().scale(0.1);
     useAlbedo(cube, [1, 1, 1, 1]);
     useFlag(cube, "lighting");
     animateEntity(cube, simpleRotationAnimation());
@@ -56,7 +56,7 @@ const setupScene = (): Entity => {
 };
 
 export default {
-    name: "lights",
-    displayName: "Lights Demo",
+    name: "lights2",
+    displayName: "Lights Demo 2",
     load: setupScene
 };
