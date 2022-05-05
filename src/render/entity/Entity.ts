@@ -1,7 +1,6 @@
 import { Mat4 } from "../../../lib/TSM";
 import { Nullable } from "../../utils/Types";
-import { enforceDefined } from "../../utils/Utils";
-import { LightEntity } from "./LightEntity";
+import type { BaseEntity } from "./common/BaseEntity";
 import { Transform } from "./Transform";
 
 export class Entity {
@@ -15,19 +14,21 @@ export class Entity {
 
     public readonly id: number = Entity.entityIdCounter++;
     
-
-    protected baseEntity: Nullable<BaseEntity> = null;
     private parentEntity: Nullable<Entity> = null;
     private _globalTransform: Mat4 = Mat4.identity.copy();
     private _relativeTransform: Transform = new Transform();
     private _needToUpdateTransform = false;
 
-    private childEntities: Entity[] = [];
+    public childEntities: Entity[] = [];
 
     public entityData: Map<string, any> = new Map<string, any>();
 
     constructor() {
         this._relativeTransform.bindOnChange(() => this._needToUpdateTransform = true);
+    }
+
+    public setup(gl: RenderingContext): void {
+        this.childEntities.forEach(e => e.setup(gl));
     }
 
     public updateEntity(dt: number): void {
@@ -36,31 +37,21 @@ export class Entity {
         this.childEntities.forEach(e => e.updateEntity(dt));
     }
 
-    public setup(gl: RenderingContext): void {
-        this.childEntities.forEach(e => e.setup(gl));
-    }
-
     public render(): void {
-        this.renderChildren();
-    }
-    protected renderChildren(): void {
         this.childEntities.forEach(e => e.render());
     }
 
-    public updateTransforms(): void {
-        const transform = this.parentEntity ? this.parentEntity._globalTransform.copy() : Mat4.identity.copy();
-        this._globalTransform = transform.multiply(this._relativeTransform.getTransformMatrix());
-        this.childEntities.forEach(e => e.updateTransforms());
-        this._needToUpdateTransform = false;
+    public getBaseEntity(): BaseEntity {
+        if (this.entityData.get("isBaseEntity"))
+            return this as any as BaseEntity;
+        if (this.parentEntity)
+            return this.parentEntity.getBaseEntity();
+        throw new Error("No base entity found");
     }
 
     public addChildEntity(entity: Entity): void {
         this.childEntities.push(entity);
         entity.parentEntity = this;
-        entity._onAdd();
-    }
-    public _onAdd(): void {
-        this.baseEntity = enforceDefined(this.parentEntity).baseEntity;
     }
 
     public removeChildEntityById(id: number, complain = true): Entity | null {
@@ -73,15 +64,19 @@ export class Entity {
         const entity = this.childEntities[index];
         this.childEntities.splice(index, 1);
         entity.parentEntity = null;
-        entity._onRemove();
         return entity;
     }
     public removeChildEntity(entity: Entity, complain = true): Entity | null {
         return this.removeChildEntityById(entity.id, complain);
     }
-    public _onRemove(): void {
-        this.baseEntity = null;
+
+    public updateTransforms(): void {
+        const transform = this.parentEntity ? this.parentEntity._globalTransform.copy() : Mat4.identity.copy();
+        this._globalTransform = transform.multiply(this._relativeTransform.getTransformMatrix());
+        this.childEntities.forEach(e => e.updateTransforms());
+        this._needToUpdateTransform = false;
     }
+
 
     public get globalTransform(): Mat4 {
         if (this._needToUpdateTransform)
@@ -97,25 +92,4 @@ export class Entity {
 
     public get transform(): Transform { return this.relativeTransform; }
     public set transform(value: Transform) { this.relativeTransform = value; }
-}
-
-
-export class BaseEntity extends Entity {
-
-    public lights: LightEntity[] = [];
-
-    constructor() {
-        super();
-        this.baseEntity = this;
-    }
-
-    public getLightPositions(): Float32Array {
-        return new Float32Array(this.lights.flatMap(l => l.lightPosition.xyz));
-    }
-    public getLightColors(): Float32Array {
-        return new Float32Array(this.lights.flatMap(l => l.lightColor.xyz));
-    }
-    public getLightInfos(): Float32Array {
-        return new Float32Array(this.lights.flatMap(l => l.lightInfo.xyzw));
-    }
 }

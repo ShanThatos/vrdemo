@@ -1,15 +1,18 @@
 import type { XRFrame, XRReferenceSpace, XRSession, XRWebGLLayer } from "webxr";
-import { renderScene, setupScene, updateScene } from "./render/Scene";
+import { Scene } from "./Scene";
+import { findScene } from "./scenes/SceneLoader";
 import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
 
 const windowany = window as any;
 const statusElement = getElement("statusMessage");
 
+const XR_SESSION_TYPE = "local-floor";
 let xrsession: XRSession;
 let baseCanvas: HTMLCanvasElement;
 let gl: XRRenderingContext;
 let referenceSpace: XRReferenceSpace;
+let scene: Scene;
 
 const startXRSession = async () => {
     let txr;
@@ -26,7 +29,7 @@ const startXRSession = async () => {
 
     if (!isImmersiveVR) throw new Error("No immersive-vr support");
 
-    xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: ["local"] });
+    xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: [XR_SESSION_TYPE] });
     xrsession.addEventListener("end", () => {
         alert("XR Session has ended");
     });
@@ -36,6 +39,8 @@ const startXRSession = async () => {
     if (!tgl) throw new Error("No WebGL support");
     
     gl = tgl as XRRenderingContext;
+    scene = new Scene(gl);
+    scene.setup(findScene("lights"));
 
     xrsession.updateRenderState({
         baseLayer: new windowany.XRWebGLLayer(xrsession, gl),
@@ -43,15 +48,13 @@ const startXRSession = async () => {
         depthNear: .001,
     });
 
-    referenceSpace = (await xrsession.requestReferenceSpace("local")) as XRReferenceSpace;
-
-    setupScene(gl);
+    referenceSpace = (await xrsession.requestReferenceSpace(XR_SESSION_TYPE)) as XRReferenceSpace;
 
     xrsession.requestAnimationFrame(drawFrame);
 };
 
 const drawFrame = (time: number, frame: XRFrame) => {
-    physicsUpdate(time);
+    scene.update(time / 1000.0);
     xrsession.requestAnimationFrame(drawFrame);
 
     const pose = frame.getViewerPose(referenceSpace);
@@ -72,30 +75,16 @@ const drawFrame = (time: number, frame: XRFrame) => {
         for (const view of pose.views) {
             const vp = gllayer.getViewport(view);
             gl.viewport(vp.x, vp.y, vp.width, vp.height);
-            renderScene(gl, view);
+            scene.renderXRViewScene(view);
         }
     } else {
         console.log("Tracking lost");
     }
 };
 
-let prevUpdateTime = 0;
-const physicsUpdate = (time: number) => {
-    if (prevUpdateTime === 0) {
-        prevUpdateTime = time;
-        return;
-    }
-
-    const delta = (time - prevUpdateTime) / 1000.0;
-    prevUpdateTime = time;
-
-    updateScene(time / 1000.0, delta);
-};
-
-
 export const init = () => {
     startXRSession()
-        .catch(err => {
+        .catch((err: Error) => {
             console.log(err);
             statusElement.innerHTML += err;
         });

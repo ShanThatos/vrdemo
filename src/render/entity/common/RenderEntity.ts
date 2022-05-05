@@ -1,8 +1,9 @@
-import { Nullable, XRRenderingContext } from "../../utils/Types";
-import { enforceDefined } from "../../utils/Utils";
-import { FS_generic, VS_verts } from "../shaders/shaders";
-import { RenderPass } from "../webgl/RenderPass";
-import { Entity } from "./Entity";
+import { Nullable, XRRenderingContext } from "../../../utils/Types";
+import { enforceDefined } from "../../../utils/Utils";
+import { VS_verts, FS_generic } from "../../shaders/shaders";
+import { RenderPass } from "../../webgl/RenderPass";
+import { Entity } from "../Entity";
+
 
 
 export class RenderEntity extends Entity {
@@ -71,13 +72,13 @@ export class RenderEntity extends Entity {
 
         if (hasFlag(this, "lighting")) {
             this.rp.addUniform("lightPositions", (gl: XRRenderingContext, loc: WebGLUniformLocation) => {
-                gl.uniform3fv(loc, enforceDefined(this.baseEntity).getLightPositions());
+                gl.uniform3fv(loc, this.getBaseEntity().getLightPositions());
             });
             this.rp.addUniform("lightColors", (gl: XRRenderingContext, loc: WebGLUniformLocation) => {
-                gl.uniform3fv(loc, enforceDefined(this.baseEntity).getLightColors());
+                gl.uniform3fv(loc, this.getBaseEntity().getLightColors());
             });
             this.rp.addUniform("lightInfos", (gl: XRRenderingContext, loc: WebGLUniformLocation) => {
-                gl.uniform4fv(loc, enforceDefined(this.baseEntity).getLightInfos());
+                gl.uniform4fv(loc, this.getBaseEntity().getLightInfos());
             });
         }
 

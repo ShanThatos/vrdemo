@@ -12,8 +12,8 @@ export const animateEntity = (entity: Entity, animateFunction: AnimateFunction):
     return entity;
 };
 
-export const simpleRotationAnimation = ({v = Vec3.up, speed = 1} = {}) => {
+export const simpleRotationAnimation = ({axis = Vec3.up, speed = 1} = {}) => {
     return (entity: Entity, _time: number, dt: number) => {
-        entity.transform.rotate(Quat.fromAxisAngle(v, speed * dt));
+        entity.transform.rotate(Quat.fromAxisAngle(axis, speed * dt));
     };
 };

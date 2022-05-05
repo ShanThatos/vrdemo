@@ -1,5 +1,5 @@
 import { enforceDefined } from "../../../utils/Utils";
-import { RenderEntity } from "../RenderEntity";
+import { RenderEntity } from "../common/RenderEntity";
 import CUBE from "./data/Cube.json";
 
 const SOLIDS_ARR = [CUBE];

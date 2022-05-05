@@ -1,7 +1,7 @@
-import { Vec3, Vec4 } from "../../../lib/TSM";
-import { Nullable } from "../../utils/Types";
-import { enforceDefined } from "../../utils/Utils";
-import { Entity } from "./Entity";
+import { Vec3, Vec4 } from "../../../../lib/TSM";
+import { Nullable } from "../../../utils/Types";
+import { enforceDefined } from "../../../utils/Utils";
+import { Entity } from "../Entity";
 
 export class LightEntity extends Entity {
 
@@ -10,19 +10,9 @@ export class LightEntity extends Entity {
     constructor(color: Vec3 = new Vec3([1, 1, 1])) {
         super();
         this._color = color.copy();
+        this.entityData.set("isLight", true);
     }
-
-    public _onAdd(): void {
-        super._onAdd();
-        enforceDefined(this.baseEntity).lights.push(this);
-    }
-
-    public _onRemove(): void {
-        const be = enforceDefined(this.baseEntity);
-        be.lights.splice(be.lights.findIndex(e => e.id === this.id), 1);
-        super._onRemove();
-    }
-
+    
     public get lightPosition(): Vec3 { return this.globalTransform.multiplyPt3(new Vec3([0, 0, 0])); }
     public get lightColor(): Vec3 { return enforceDefined(this._color); }
     public get lightInfo(): Vec4 { throw new Error("Not implemented"); }
