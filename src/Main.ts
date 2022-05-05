@@ -40,7 +40,7 @@ const startXRSession = async () => {
     xrsession.updateRenderState({
         baseLayer: new windowany.XRWebGLLayer(xrsession, gl),
         depthFar: 100,
-        depthNear: .1,
+        depthNear: .001,
     });
 
     referenceSpace = (await xrsession.requestReferenceSpace("local")) as XRReferenceSpace;

@@ -23,6 +23,7 @@ export const setupScene = (gl: XRRenderingContext) => {
 
     const floor = loadSolid("cube");
     floor.transform.scale = new Vec3([100, 1, 100]);
+    floor.transform.position = new Vec3([0, -0.5, 0]);
     useAlbedo(floor, [.8, .8, .8, 1]);
     useFlag(floor, "lighting");
     baseEntity.addChildEntity(floor);
