@@ -7,7 +7,7 @@ export class WebGLUtilities {
      * Extends the given WebGL context with unsigned int indices
      * @param ctx the WebGL rendering context to extend
      */
-    public static requestIntIndicesExt(ctx: WebGLRenderingContext): void {
+    public static requestIntIndicesExt(ctx: XRRenderingContext): void {
         /* Request unsigned int indices extention */
         const extIndex = ctx.getExtension("OES_element_index_uint");
         if (!extIndex) {
@@ -21,7 +21,7 @@ export class WebGLUtilities {
      * @return the VAO extension
      */
     public static requestVAOExt(
-        ctx: WebGLRenderingContext
+        ctx: XRRenderingContext
     ): OES_vertex_array_object {
         /* Request vao extension */
         const extVAO = ctx.getExtension("OES_vertex_array_object");
@@ -29,6 +29,13 @@ export class WebGLUtilities {
             throw new Error("Your browser does not support the VAO extension.");
         }
         return extVAO;
+    }
+
+    public static requestDepthTextureExt(gl: XRRenderingContext): void {
+        /* Request depth texture extention */
+        const extDepthTexture = gl.getExtension("WEBGL_depth_texture");
+        if (!extDepthTexture)
+            throw new Error("Your browser does not support the depth texture extension.");
     }
 
     public static createShader(gl: XRRenderingContext, shaderType: "vertex" | "fragment", shaderCode: string): WebGLShader {

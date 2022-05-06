@@ -1,9 +1,11 @@
 import { Vec3 } from "../../lib/TSM";
 import { animateEntity, simpleRotationAnimation } from "../render/entity/Animate";
 import { Entity } from "../render/entity/Entity";
-import { AmbientLightEntity, PointLightEntity, DirectionalLightEntity } from "../render/entity/common/LightEntity";
 import { useAlbedo, useFlag } from "../render/entity/common/RenderEntity";
 import { loadSolid } from "../render/entity/solids/Solids";
+import { AmbientLight } from "../render/entity/common/lights/AmbientLight";
+import { DirectionalLight } from "../render/entity/common/lights/DirectionalLight";
+import { PointLight } from "../render/entity/common/lights/PointLight";
 
 const setupScene = (): Entity => {
     const root = new Entity();
@@ -23,9 +25,9 @@ const setupScene = (): Entity => {
     useFlag(floor, "lighting");
     root.addChildEntity(floor);
 
-    root.addChildEntity(new AmbientLightEntity(new Vec3([1, 1, 1]).scale(0.1)));
+    root.addChildEntity(new AmbientLight(new Vec3([1, 1, 1]).scale(0.1)));
     
-    const redPointLight = new PointLightEntity({ color: new Vec3([1, 0, 0]) });
+    const redPointLight = new PointLight({ color: new Vec3([1, 0, 0]) });
     redPointLight.transform.position = new Vec3([4, 5, 4]);
     animateEntity(redPointLight, (e, time, _dt) => {
         const mul = (Math.sin(time / 2)) * 2;
@@ -33,7 +35,7 @@ const setupScene = (): Entity => {
     });
     root.addChildEntity(redPointLight);
 
-    const bluePointLight = new PointLightEntity({ color: new Vec3([0, 0, 1]) });
+    const bluePointLight = new PointLight({ color: new Vec3([0, 0, 1]) });
     bluePointLight.transform.position = new Vec3([-4, 5, 4]);
     animateEntity(bluePointLight, (e, time, _dt) => {
         const mul = (Math.sin(time / 2)) * 2;
@@ -41,7 +43,7 @@ const setupScene = (): Entity => {
     });
     root.addChildEntity(bluePointLight);
 
-    const greenPointLight = new PointLightEntity({ color: new Vec3([0, 1, 0]) });
+    const greenPointLight = new PointLight({ color: new Vec3([0, 1, 0]) });
     greenPointLight.transform.position = new Vec3([0, 5, -3]);
     animateEntity(greenPointLight, (e, time, _dt) => {
         const mul = (Math.sin(time / 2)) * 2;
@@ -49,7 +51,7 @@ const setupScene = (): Entity => {
     });
     root.addChildEntity(greenPointLight);
 
-    const dirLight = new DirectionalLightEntity({ direction: new Vec3([-1, -1, 1]), intensity: 0.2 });
+    const dirLight = new DirectionalLight({ direction: new Vec3([-1, -1, 1]), intensity: 0.2 });
     root.addChildEntity(dirLight);
 
     return root;

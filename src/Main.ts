@@ -36,7 +36,7 @@ const startXRSession = async () => {
 
     if (!isImmersiveVR) throw new Error("No immersive-vr support");
 
-    xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: [XR_SESSION_TYPE] });
+    xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: [XR_SESSION_TYPE], optionalFeatures: ["hand-tracking"] });
     xrsession.addEventListener("end", () => {
         console.log("Session ended");
         baseCanvas.style.display = "none";
@@ -46,8 +46,6 @@ const startXRSession = async () => {
     if (!tgl) throw new Error("No WebGL support");
     
     gl = tgl as XRRenderingContext;
-    scene = new Scene(gl);
-    scene.setup(findScene(selectedSceneName));
 
     xrsession.updateRenderState({
         baseLayer: new windowany.XRWebGLLayer(xrsession, gl),
@@ -58,11 +56,19 @@ const startXRSession = async () => {
     referenceSpace = (await xrsession.requestReferenceSpace(XR_SESSION_TYPE)) as XRReferenceSpace;
 
     baseCanvas.style.display = "block";
+    xrsession.requestAnimationFrame(firstFrame);
+};
+
+const firstFrame = (_time: number, _frame: XRFrame) => {
+    const gllayer = xrsession.renderState.baseLayer as XRWebGLLayer;
+    scene = new Scene(gl, gllayer.framebuffer, xrsession, referenceSpace);
+    scene.setup(findScene(selectedSceneName));
     xrsession.requestAnimationFrame(drawFrame);
 };
 
 const drawFrame = (time: number, frame: XRFrame) => {
     try {
+        scene.frame = frame;
         scene.update(time / 1000.0);
         xrsession.requestAnimationFrame(drawFrame);
 
@@ -76,7 +82,6 @@ const drawFrame = (time: number, frame: XRFrame) => {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             
             gl.enable(gl.DEPTH_TEST);
-
             gl.enable(gl.CULL_FACE);
             gl.frontFace(gl.CCW);
             gl.cullFace(gl.BACK);
@@ -126,6 +131,15 @@ window.onload = () => {
 const displayError = (err: any) => {
     console.log(err);
     statusElementContainer.style.display = "block";
-    statusElement.innerHTML += err + "<br/>";
+    statusElement.innerHTML += "<br/>" + err;
     xrsession.end();
+};
+
+export const appendStatusMessage = (message: string) => {
+    statusElementContainer.style.display = "block";
+    statusElement.innerHTML += "<br/>" + message;
+};
+export const showStatusMessage = (message: string) => {
+    statusElement.innerHTML = message;
+    statusElementContainer.style.display = message === "" ? "none" : "block";
 };

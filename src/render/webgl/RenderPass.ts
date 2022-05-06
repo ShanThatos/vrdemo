@@ -1,8 +1,9 @@
+import { XRRenderingContext } from "../../utils/Types";
 import { WebGLUtilities } from "./WebGLUtilities";
 
 
 export class RenderPass {
-    private ctx: WebGLRenderingContext;
+    private ctx: XRRenderingContext;
     private extVAO: OES_vertex_array_object;
 
     /* Shader information */
@@ -29,7 +30,7 @@ export class RenderPass {
     private textureLoaded: boolean;
     public texture: WebGLTexture;
 
-    constructor(extVAO: OES_vertex_array_object, context: WebGLRenderingContext, vShader: string, fShader: string) {
+    constructor(extVAO: OES_vertex_array_object, context: XRRenderingContext, vShader: string, fShader: string) {
         this.extVAO = extVAO;
         this.ctx = context;
         this.vShader = vShader.slice();
@@ -56,7 +57,7 @@ export class RenderPass {
     }
 
     public setup() {
-        const gl: WebGLRenderingContext = this.ctx;
+        const gl: XRRenderingContext = this.ctx;
         this.shaderProgram = WebGLUtilities.createShaderProgram(gl, this.vShader, this.fShader);
         gl.useProgram(this.shaderProgram);
 
@@ -161,7 +162,7 @@ export class RenderPass {
     }
 
     public addUniform(name: string,
-        bindFunction: (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => void) {
+        bindFunction: (gl: XRRenderingContext, loc: WebGLUniformLocation) => void) {
         this.uniforms.set(name, new Uniform(0, bindFunction));
     }
 
@@ -213,10 +214,10 @@ export class RenderPass {
 
 class Uniform {
     public location: WebGLUniformLocation;
-    public bindFunction: (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => void;
+    public bindFunction: (gl: XRRenderingContext, loc: WebGLUniformLocation) => void;
 
     constructor(location: WebGLUniformLocation,
-        bindFunction: (gl: WebGLRenderingContext, loc: WebGLUniformLocation) => void) {
+        bindFunction: (gl: XRRenderingContext, loc: WebGLUniformLocation) => void) {
         this.location = location;
         this.bindFunction = bindFunction;
     }
