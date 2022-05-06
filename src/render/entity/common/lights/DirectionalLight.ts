@@ -1,8 +1,6 @@
 import { Vec3, Vec4 } from "../../../../../lib/TSM";
-import { Nullable, XRRenderingContext } from "../../../../utils/Types";
+import { Nullable } from "../../../../utils/Types";
 import { enforceDefined } from "../../../../utils/Utils";
-import { RenderPass } from "../../../webgl/RenderPass";
-import { Entity } from "../../Entity";
 import { LightEntity } from "./LightEntity";
 
 
