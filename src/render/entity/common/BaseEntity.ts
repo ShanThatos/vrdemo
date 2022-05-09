@@ -1,16 +1,13 @@
-import { Scene } from "../../../Scene";
 import { XRRenderingContext } from "../../../utils/Types";
 import { Entity } from "../Entity";
 import { LightEntity } from "./lights/LightEntity";
 
 export class BaseEntity extends Entity {
 
-    public scene: Scene;
     public lights: LightEntity[] = [];
 
-    constructor(scene: Scene) {
+    constructor() {
         super();
-        this.scene = scene;
         this.entityData.set("isBaseEntity", true);
     }
 

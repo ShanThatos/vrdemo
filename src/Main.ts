@@ -1,26 +1,15 @@
-import type { XRFrame, XRReferenceSpace, XRSession, XRWebGLLayer } from "webxr";
-import { Scene } from "./Scene";
+import type { XRFrame, XRReferenceSpace, XRWebGLLayer } from "webxr";
+import { getScene, Scene } from "./Scene";
 import { ALL_SCENES, findScene } from "./scenes/SceneLoader";
 import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
 import { enforceDefined } from "./utils/Utils";
 
 const windowany = window as any;
-const baseCanvas = getElement<HTMLCanvasElement>("glCanvas");
-const statusElementContainer = getElement("statusContainer");
-const statusElement = getElement("statusMessage");
-const demoNameElement = getElement("demoName");
-const scenesDropdown = getElement("scenesDropdown");
-
-const XR_SESSION_TYPE = "local-floor";
-let xrsession: XRSession;
-let gl: XRRenderingContext;
-let referenceSpace: XRReferenceSpace;
-let selectedSceneName: string;
-let scene: Scene;
 
 const startXRSession = async () => {
 
+    const baseCanvas = getElement<HTMLCanvasElement>("glCanvas");
 
     let txr;
     {
@@ -36,7 +25,7 @@ const startXRSession = async () => {
 
     if (!isImmersiveVR) throw new Error("No immersive-vr support");
 
-    xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: [XR_SESSION_TYPE], optionalFeatures: ["hand-tracking"] });
+    const xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: ["local-floor"], optionalFeatures: ["hand-tracking"] });
     xrsession.addEventListener("end", () => {
         console.log("Session ended");
         baseCanvas.style.display = "none";
@@ -45,7 +34,7 @@ const startXRSession = async () => {
     const tgl = baseCanvas.getContext("webgl", { xrCompatible: true });
     if (!tgl) throw new Error("No WebGL support");
     
-    gl = tgl as XRRenderingContext;
+    const gl = tgl as XRRenderingContext;
 
     xrsession.updateRenderState({
         baseLayer: new windowany.XRWebGLLayer(xrsession, gl),
@@ -53,29 +42,37 @@ const startXRSession = async () => {
         depthNear: .001,
     });
 
-    referenceSpace = (await xrsession.requestReferenceSpace(XR_SESSION_TYPE)) as XRReferenceSpace;
+    const referenceSpace = (await xrsession.requestReferenceSpace("local-floor")) as XRReferenceSpace;
 
+    const scene = windowany.scene = new Scene();
+    scene.gl = gl;
+    scene.xrsession = xrsession;
+    scene.referenceSpace = referenceSpace;
+    
     baseCanvas.style.display = "block";
     xrsession.requestAnimationFrame(firstFrame);
 };
 
 const firstFrame = (_time: number, _frame: XRFrame) => {
-    const gllayer = xrsession.renderState.baseLayer as XRWebGLLayer;
-    scene = new Scene(gl, gllayer.framebuffer, xrsession, referenceSpace);
-    scene.setup(findScene(selectedSceneName));
-    xrsession.requestAnimationFrame(drawFrame);
+    const scene = getScene();
+    const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
+    scene.screenFramebuffer = gllayer.framebuffer;
+    scene.setup();
+    scene.xrsession.requestAnimationFrame(drawFrame);
 };
 
 const drawFrame = (time: number, frame: XRFrame) => {
     try {
+        const scene = getScene();
+        const gl = scene.gl;
         scene.frame = frame;
         scene.update(time / 1000.0);
-        xrsession.requestAnimationFrame(drawFrame);
+        scene.xrsession.requestAnimationFrame(drawFrame);
 
-        const pose = frame.getViewerPose(referenceSpace);
+        const pose = frame.getViewerPose(scene.referenceSpace);
 
         if (pose) {
-            const gllayer = xrsession.renderState.baseLayer as XRWebGLLayer;
+            const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
 
             gl.bindFramebuffer(gl.FRAMEBUFFER, gllayer.framebuffer);
             gl.clearColor(0, 0, 0, 1);
@@ -95,31 +92,32 @@ const drawFrame = (time: number, frame: XRFrame) => {
             console.log("Tracking lost");
         }
     } catch (err) {
-        displayError(err);
+        handleError(err);
     }
 };
 
 export const init = () => {
-    startXRSession().catch(displayError);
+    startXRSession().catch(handleError);
 };
 
 const setupScenesDropdown = () => {
+    const demoNameElement = getElement("demoName");
+    const scenesDropdown = getElement("scenesDropdown");
     scenesDropdown.innerHTML = "";
-    for (const scene of ALL_SCENES) {
+    for (const sc of ALL_SCENES) {
         const aEl = document.createElement("a");
         aEl.classList.add("sceneDropdownItem", "dropdown-item");
-        aEl.setAttribute("scene", scene.name);
-        aEl.innerHTML = scene.displayName;
+        aEl.setAttribute("scene", sc.name);
+        aEl.innerHTML = sc.displayName;
         aEl.addEventListener("click", (e: MouseEvent) => {
-            const scene = findScene(enforceDefined((e.currentTarget as HTMLElement).getAttribute("scene")));
-            demoNameElement.innerHTML = scene.displayName;
-            selectedSceneName = scene.name;
+            const sceneInfo = findScene(enforceDefined((e.currentTarget as HTMLElement).getAttribute("scene")));
+            demoNameElement.innerHTML = sceneInfo.displayName;
+            Scene.selectedSceneName = sceneInfo.name;
         });
         const liEl = document.createElement("li");
         liEl.appendChild(aEl);
         scenesDropdown.appendChild(liEl);
     }
-    selectedSceneName = ALL_SCENES[0].name;
     demoNameElement.innerHTML = ALL_SCENES[0].displayName;
 };
 
@@ -128,18 +126,16 @@ window.onload = () => {
     getElement("startButton").addEventListener("click", init);
 };
 
-const displayError = (err: any) => {
+const handleError = (err: any) => {
+    const scene = getScene();
     console.log(err);
-    statusElementContainer.style.display = "block";
-    statusElement.innerHTML += "<br/>" + err;
-    xrsession.end();
+    appendStatusMessage(err);
+    scene.xrsession.end();
 };
 
 export const appendStatusMessage = (message: string) => {
+    const statusElementContainer = getElement("statusContainer");
+    const statusElement = getElement("statusMessage");
     statusElementContainer.style.display = "block";
     statusElement.innerHTML += "<br/>" + message;
-};
-export const showStatusMessage = (message: string) => {
-    statusElement.innerHTML = message;
-    statusElementContainer.style.display = message === "" ? "none" : "block";
 };

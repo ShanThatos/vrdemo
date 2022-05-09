@@ -71,8 +71,8 @@ export class Entity {
     }
 
     public updateTransforms(): void {
-        const transform = this.parentEntity ? this.parentEntity._globalTransform.copy() : Mat4.identity.copy();
-        this._globalTransform = transform.multiply(this._relativeTransform.getTransformMatrix());
+        const parentTransform = this.parentEntity ? this.parentEntity._globalTransform.copy() : Mat4.identity.copy();
+        this._globalTransform = parentTransform.multiply(this._relativeTransform.getTransformMatrix());
         this.childEntities.forEach(e => e.updateTransforms());
         this._needToUpdateTransform = false;
     }

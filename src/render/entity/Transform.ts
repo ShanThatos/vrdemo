@@ -19,9 +19,9 @@ export class Transform {
     }
 
     public getTransformMatrix(): Mat4 {
-        const T = Mat4.identity.copy().translate(this.position);
-        const R = this.rotation.toMat4();
-        const S = Mat4.identity.copy().scale(this.scale);
+        const T = Mat4.identity.copy().translate(this._position);
+        const R = this._rotation.toMat4();
+        const S = Mat4.identity.copy().scale(this._scale);
         return T.multiply(R).multiply(S);
     }
 
@@ -38,6 +38,11 @@ export class Transform {
     public get rotation() { return this._rotation.copy(); }
     public set rotation(value: Quat) {
         this._rotation = value.copy();
+        this.tryOnChange();
+    }
+
+    public translate(v: Vec3) {
+        this._position.add(v);
         this.tryOnChange();
     }
     public rotate(q: Quat) {

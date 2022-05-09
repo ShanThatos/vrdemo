@@ -1,37 +1,32 @@
 import type { XRFrame, XRReferenceSpace, XRSession, XRView } from "webxr";
 import { Mat4, Vec3 } from "../lib/TSM";
-import { Entity } from "./render/entity/Entity";
 import { BaseEntity } from "./render/entity/common/BaseEntity";
+import { Entity } from "./render/entity/Entity";
 import { WebGLUtilities } from "./render/webgl/WebGLUtilities";
-import { SceneLoader } from "./scenes/SceneLoader";
+import { ALL_SCENES, findScene } from "./scenes/SceneLoader";
 import { Nullable, XRRenderingContext } from "./utils/Types";
+import { enforceDefined } from "./utils/Utils";
 
 export class Scene {
+    public static selectedSceneName = ALL_SCENES[0].name;
 
-    private gl: XRRenderingContext;
-    private canvasFramebuffer: WebGLFramebuffer;
-    private xrsession: XRSession;
-    public frame: Nullable<XRFrame> = null;
-    public referenceSpace: Nullable<XRReferenceSpace> = null;
+    private _gl: Nullable<XRRenderingContext> = null;
+    private _xrsession: Nullable<XRSession> = null;
+    private _frame: Nullable<XRFrame> = null;
+    private _referenceSpace: Nullable<XRReferenceSpace> = null;
+    private _screenFramebuffer: Nullable<WebGLFramebuffer> = null;
+    private _baseEntity: Nullable<BaseEntity> = null;
 
     public currentTime = 0;
-    public baseEntity: BaseEntity;
 
-    constructor(gl: XRRenderingContext, canvasFramebuffer: WebGLFramebuffer, xrsession: XRSession, referenceSpace: XRReferenceSpace) {
-        this.gl = gl;
-        this.canvasFramebuffer = canvasFramebuffer;
-        this.baseEntity = new BaseEntity(this);
-        this.xrsession = xrsession;
-        this.referenceSpace = referenceSpace;
-    }
-
-    public setup(sceneLoader: SceneLoader) {
+    public setup() {
+        const sceneLoader = findScene(Scene.selectedSceneName);
+        const baseEntity = this._baseEntity = new BaseEntity();
         const gl = this.gl;
         WebGLUtilities.requestIntIndicesExt(gl);
         Entity.extVAO = WebGLUtilities.requestVAOExt(gl);
         WebGLUtilities.requestDepthTextureExt(gl);
 
-        const baseEntity = this.baseEntity;
         baseEntity.addChildEntity(sceneLoader.load());
         baseEntity.setup(gl);
     }
@@ -62,14 +57,40 @@ export class Scene {
         this.baseEntity.updateEntity(dt);
     }
 
-    // Made this a method so it can be overrided (possibly for shadow maps?)
-    public getRenderingContext(): XRRenderingContext {
-        return this.gl;
+
+    public get gl(): XRRenderingContext {
+        return enforceDefined(this._gl);
     }
-    public getCanvasFramebuffer(): WebGLFramebuffer {
-        return this.canvasFramebuffer;
+    public set gl(value: XRRenderingContext) {
+        this._gl = value;
     }
-    public getXRSession(): XRSession {
-        return this.xrsession;
+    public get screenFramebuffer(): WebGLFramebuffer {
+        return enforceDefined(this._screenFramebuffer);
+    }
+    public set screenFramebuffer(value: WebGLFramebuffer) {
+        this._screenFramebuffer = value;
+    }
+    public get xrsession(): XRSession {
+        return enforceDefined(this._xrsession);
+    }
+    public set xrsession(value: XRSession) {
+        this._xrsession = value;
+    }
+    public get frame(): XRFrame {
+        return enforceDefined(this._frame);
+    }
+    public set frame(value: XRFrame) {
+        this._frame = value;
+    }
+    public get referenceSpace(): XRReferenceSpace {
+        return enforceDefined(this._referenceSpace);
+    }
+    public set referenceSpace(value: XRReferenceSpace) {
+        this._referenceSpace = value;
+    }
+    public get baseEntity(): BaseEntity {
+        return enforceDefined(this._baseEntity);
     }
 }
+
+export const getScene = () => enforceDefined<Scene>((window as any).scene);
