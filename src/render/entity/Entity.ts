@@ -77,7 +77,6 @@ export class Entity {
         this._needToUpdateTransform = false;
     }
 
-
     public get globalTransform(): Mat4 {
         if (this._needToUpdateTransform)
             this.updateTransforms();

@@ -13,7 +13,7 @@ export class Transform {
         this._onChange = callback;
     }
 
-    private tryOnChange() {
+    protected tryOnChange() {
         if (this._onChange !== null)
             this._onChange();
     }
@@ -48,6 +48,10 @@ export class Transform {
     public rotate(q: Quat) {
         this.rotation = q.copy().multiply(this.rotation);
     }
+    public applyScale(v: Vec3) {
+        this._scale.multiply(v);
+        this.tryOnChange();
+    }
 
     public copy(): Transform {
         const result = new Transform();
@@ -62,6 +66,51 @@ export class Transform {
         result.position = Vec3.lerp(a.position, b.position, t);
         result.scale = Vec3.lerp(a.scale, b.scale, t);
         result.rotation = Quat.slerp(a.rotation, b.rotation, t);
+        return result;
+    }
+}
+
+// This is terrible OOP but basically this class just ignores the components of the parent entity
+export class MatTransform extends Transform {
+    private _matrix: Mat4 = Mat4.identity.copy();
+
+    public get matrix() { return this._matrix.copy(); }
+    public set matrix(value: Mat4) {
+        this._matrix = value.copy();
+        this.tryOnChange();
+    }
+
+    public getTransformMatrix(): Mat4 {
+        return this._matrix.copy();
+    }
+
+
+    public get position() { throw new Error("uh oh"); }
+    public set position(_value: Vec3) { throw new Error("uh oh"); }
+    public get scale() { throw new Error("uh oh"); }
+    public set scale(_value: Vec3) { throw new Error("uh oh"); }
+    public get rotation() { throw new Error("uh oh"); }
+    public set rotation(_value: Quat) { throw new Error("uh oh"); }
+
+    public translate(v: Vec3) {
+        this._matrix = Mat4.identity.copy().translate(v).multiply(this._matrix);
+        this.tryOnChange();
+    }
+    public rotate(q: Quat) {
+        this._matrix = q.toMat4().multiply(this._matrix);
+        this.tryOnChange();
+    }
+    public applyScale(v: Vec3) {
+        this._matrix = Mat4.identity.copy().scale(v).multiply(this._matrix);
+        this.tryOnChange();
+    }
+    public applyTransform(m: Mat4) {
+        this._matrix = m.copy().multiply(this._matrix);
+    }
+
+    public copy(): Transform {
+        const result = new MatTransform();
+        result.matrix = this._matrix.copy();
         return result;
     }
 }

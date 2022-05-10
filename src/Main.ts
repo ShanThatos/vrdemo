@@ -96,7 +96,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
     }
 };
 
-export const init = () => {
+const init = () => {
     startXRSession().catch(handleError);
 };
 
