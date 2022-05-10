@@ -1,7 +1,7 @@
 import { Mat4 } from "../../../lib/TSM";
 import { Nullable } from "../../utils/Types";
 import type { BaseEntity } from "./common/BaseEntity";
-import { Transform } from "./Transform";
+import { MatTransform, Transform } from "./Transform";
 
 export class Entity {
 
@@ -17,7 +17,7 @@ export class Entity {
     private parentEntity: Nullable<Entity> = null;
     private _globalTransform: Mat4 = Mat4.identity.copy();
     private _relativeTransform: Transform = new Transform();
-    private _needToUpdateTransform = false;
+    public _needToUpdateTransform = false;
 
     public childEntities: Entity[] = [];
 
@@ -71,10 +71,16 @@ export class Entity {
     }
 
     public updateTransforms(): void {
-        const parentTransform = this.parentEntity ? this.parentEntity._globalTransform.copy() : Mat4.identity.copy();
+        const parentTransform = this.parentEntity ? this.parentEntity.globalTransform.copy() : Mat4.identity.copy();
         this._globalTransform = parentTransform.multiply(this._relativeTransform.getTransformMatrix());
-        this.childEntities.forEach(e => e.updateTransforms());
         this._needToUpdateTransform = false;
+        this.childEntities.forEach(e => e.updateTransforms());
+    }
+
+    public useMatrixTransform(): MatTransform {
+        const mat = new MatTransform();
+        this.transform = mat;
+        return mat;
     }
 
     public get globalTransform(): Mat4 {

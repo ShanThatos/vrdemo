@@ -9,6 +9,8 @@ import { JOINT_NAMES } from "./HandUtils";
 
 export class Hands extends Entity {
 
+    public static globalHandsEntity: Hands;
+
     private handNames = ["left", "right"];
     private handPoses = [new Float32Array(16 * 25), new Float32Array(16 * 25)];
     private handRadii = [new Float32Array(25), new Float32Array(25)];
@@ -16,14 +18,18 @@ export class Hands extends Entity {
     private handJoints: Array<Array<RenderEntity>> = [[], []];
     private handBones: Array<Array<RenderEntity>> = [[], []];
 
-    constructor() {
+    private complain: boolean;
+
+    constructor(complain = true) {
         super();
+        this.complain = complain;
 
         for (let hi = 0; hi < 2; hi++) {
             for (let i = 0; i < 25; i++) {
                 const joint = loadSolid("sphere", { segments: 3 });
                 joint.entityData.set("hand", this.handNames[hi]);
                 joint.entityData.set("joint", JOINT_NAMES[i]);
+                joint.transform.scale = Vec3.zero.copy();
                 useAlbedo(joint, [1, .7, .7, 1]);
                 useFlag(joint, "lighting");
                 this.handJoints[hi][i] = joint;
@@ -32,12 +38,15 @@ export class Hands extends Entity {
             
             for (let i = 0; i < 24; i++) {
                 const bone = loadSolid("cylinder", { radius: 0.7, height: 1, segments: 20});
+                bone.transform.scale = Vec3.zero.copy();
                 useAlbedo(bone, [.7, .7, 1, 1]);
                 useFlag(bone, "lighting");
                 this.handBones[hi][i] = bone;
                 this.addChildEntity(bone);
             }
         }
+
+        Hands.globalHandsEntity = this;
     }
     
     public updateEntity(dt: number): void {
@@ -105,9 +114,17 @@ export class Hands extends Entity {
                     transform.translate(middlePos);
                 });
 
-            } else {
+            } else if (this.complain) {
                 throw new Error("No hands :(");
             }
         }
+    }
+
+    public getJointPosition(hand: "left" | "right", joint: string): Vec3 {
+        const ji = JOINT_NAMES.indexOf(joint);
+        if (ji === -1)
+            throw new Error(`Unknown joint: ${joint}`);
+        const hi = this.handNames.indexOf(hand);
+        return new Mat4(Array.from(this.handPoses[hi].subarray(ji * 16, ji * 16 + 16))).multiplyPt3(Vec3.zero);
     }
 }

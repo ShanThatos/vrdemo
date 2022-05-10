@@ -12,7 +12,7 @@ export interface SceneLoader {
     load: () => Entity
 }
 
-export const ALL_SCENES = [CylinderTest, HandsScene1, HandsScene2, LightsScene, PianoScene] as Array<SceneLoader>;
+export const ALL_SCENES = [PianoScene, CylinderTest, HandsScene1, HandsScene2, LightsScene] as Array<SceneLoader>;
 
 export const findScene = (name: string): SceneLoader => {
     return enforceDefined(ALL_SCENES.find(s => s.name === name));

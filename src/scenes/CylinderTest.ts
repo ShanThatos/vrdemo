@@ -10,6 +10,29 @@ import { PointLight } from "../render/entity/common/lights/PointLight";
 const setupScene = (): Entity => {
     const root = new Entity();
 
+    const e = new Entity();
+    
+    const cube = loadSolid("cube");
+    cube.transform.scale = Vec3.one.copy().scale(.5);
+    useAlbedo(cube, [1, 1, 1, 1]);
+    useFlag(cube, "lighting");
+    e.addChildEntity(cube);
+
+    const sphere = loadSolid("sphere");
+    sphere.useMatrixTransform();
+    sphere.transform.translate(new Vec3([1, 1, 1]));
+    sphere.transform.applyScale(Vec3.one.copy().scale(.5)); 
+    useAlbedo(sphere, [1, 1, 1, 1]);
+    useFlag(sphere, "lighting");
+    cube.addChildEntity(sphere);
+
+    animateEntity(e, simpleRotationAnimation());
+    e.transform.applyScale(Vec3.one.copy().scale(.5));
+    root.addChildEntity(e);
+
+    
+
+
     const cylinder = loadSolid("sphere", { segments: 4 });
     cylinder.transform.position = new Vec3([0, 1, -1]);
     cylinder.transform.scale = Vec3.one.copy().scale(0.5);

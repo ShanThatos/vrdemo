@@ -1,4 +1,5 @@
 import { Vec3 } from "../../lib/TSM";
+import { Hands } from "../render/entity/common/hands/Hands";
 import { AmbientLight } from "../render/entity/common/lights/AmbientLight";
 import { DirectionalLight } from "../render/entity/common/lights/DirectionalLight";
 import { PointLight } from "../render/entity/common/lights/PointLight";
@@ -26,9 +27,11 @@ const setupScene = (): Entity => {
     const dirLight = new DirectionalLight({ direction: new Vec3([-1, -1, 1]), intensity: 0.5 });
     root.addChildEntity(dirLight);
 
-    root.addChildEntity(new Piano());
+    const piano = new Piano();
+    piano.transform.translate(new Vec3([0, 1.2, -.5]));
+    root.addChildEntity(piano);
 
-    // root.addChildEntity(new Hands());
+    root.addChildEntity(new Hands(false));
 
     return root;
 };

@@ -1,9 +1,12 @@
 import type { XRFrame, XRReferenceSpace, XRWebGLLayer } from "webxr";
+import { Piano } from "./render/entity/common/piano/Piano";
+import { Piano as ToneJSPiano } from "@tonejs/piano";
 import { getScene, Scene } from "./Scene";
 import { ALL_SCENES, findScene } from "./scenes/SceneLoader";
 import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
 import { enforceDefined } from "./utils/Utils";
+import * as Tone from "tone";
 
 const windowany = window as any;
 
@@ -97,16 +100,25 @@ const drawFrame = (time: number, frame: XRFrame) => {
 };
 
 const init = () => {
+    if (Scene.selectedSceneName.includes("piano")) {
+        Tone.start().then(() => {
+            Piano.tonejsPiano = new ToneJSPiano({
+                velocities: 5
+            });
+            Piano.tonejsPiano.toDestination();
+            Piano.tonejsPiano.load();
+        });
+    }
     startXRSession().catch(handleError);
 };
 
-const setupScenesDropdown = () => {
+const setupPage = () => {
     const demoNameElement = getElement("demoName");
     const scenesDropdown = getElement("scenesDropdown");
     scenesDropdown.innerHTML = "";
     for (const sc of ALL_SCENES) {
         const aEl = document.createElement("a");
-        aEl.classList.add("sceneDropdownItem", "dropdown-item");
+        aEl.classList.add("sceneDropdownItem", "dropdown-item", "darkButton");
         aEl.setAttribute("scene", sc.name);
         aEl.innerHTML = sc.displayName;
         aEl.addEventListener("click", (e: MouseEvent) => {
@@ -119,11 +131,14 @@ const setupScenesDropdown = () => {
         scenesDropdown.appendChild(liEl);
     }
     demoNameElement.innerHTML = ALL_SCENES[0].displayName;
+
+    getElement("startButton").addEventListener("click", init);
+
+    getElement("mainContainer").classList.remove("d-none");
 };
 
 window.onload = () => {
-    setupScenesDropdown();
-    getElement("startButton").addEventListener("click", init);
+    setupPage();
 };
 
 const handleError = (err: any) => {

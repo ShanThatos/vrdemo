@@ -32,18 +32,16 @@
 </head>
 
 <body class="bg-dark text-white">
-    <div class="p-4 min-vh-100 d-flex flex-column">
+    <div id="mainContainer" class="p-4 min-vh-100 d-flex flex-column d-none">
         <div id="statusContainer" class="border border-warning border-4 rounded p-3" style="display: none;">
             <h3 class="text-decoration-underline">Status Message:</h3>
             <span id="statusMessage"></span>
         </div>
         <div class="flex-fill d-flex flex-column align-items-center justify-content-center">
             <h1 class="mb-3">VR Demo</h1>
-            <div class="btn-group btn-group-lg fs-4">
-                <button class="btn btn-outline-light btn-lg border-2 px-5 darkButton" id="startButton"
-                    style="width: 500px; height: 500px;"
-                >
-                    Start <span id="demoName">Lights Demo</span>
+            <div class="btn-group btn-group-lg fs-4 dropup">
+                <button class="btn btn-outline-light btn-lg border-2 px-5 darkButton" id="startButton">
+                    Start <span id="demoName"></span>
                 </button>
                 <button class="dropdown-toggle dropdown-toggle-split btn btn-outline-light btn-lg border-2 darkButton"
                     data-bs-toggle="dropdown">
@@ -58,13 +56,28 @@
         body {
             font-family: 'Roboto', sans-serif;
         }
+        .darkButton {
+            transition: all 0.2s ease-in-out;
+        }
         .darkButton:hover, .darkButton:focus, .darkButton:active {
             background-color: black !important;
             color: white !important;
             cursor: pointer;
         }
+        #scenesDropdown {
+            padding: 8px;
+        }
+        #scenesDropdown li {
+            margin-bottom: 5px;
+        }
         .sceneDropdownItem {
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
             cursor: pointer;
+            background-color: #2b3742;
+            border: 2px solid #4e79a1;
+            border-radius: 5px;
         }
     </style>
 </body>

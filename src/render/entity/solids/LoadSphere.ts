@@ -3,6 +3,7 @@ import { enforceDefined } from "../../../utils/Utils";
 import { RenderEntity } from "../common/RenderEntity";
 
 export const loadSphere = (options: any): RenderEntity => {
+    if (!options) options = { segments: 5 };
     enforceDefined(options);
     const segments = enforceDefined<number>(options.segments);
 
