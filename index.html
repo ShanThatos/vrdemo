@@ -29,23 +29,21 @@
 
     
     <title>VR Test</title>
-  <script type="module" crossorigin src="/vrdemo/assets/index.35e13d20.js"></script>
-  <link rel="stylesheet" href="/vrdemo/assets/index.b6c808df.css">
+  <script type="module" crossorigin src="/vrdemo/assets/index.0ffda257.js"></script>
+  <link rel="stylesheet" href="/vrdemo/assets/index.16cbf4ef.css">
 </head>
 
 <body class="bg-dark text-white">
-    <div class="p-4 min-vh-100 d-flex flex-column">
+    <div id="mainContainer" class="p-4 min-vh-100 d-flex flex-column d-none">
         <div id="statusContainer" class="border border-warning border-4 rounded p-3" style="display: none;">
             <h3 class="text-decoration-underline">Status Message:</h3>
             <span id="statusMessage"></span>
         </div>
         <div class="flex-fill d-flex flex-column align-items-center justify-content-center">
             <h1 class="mb-3">VR Demo</h1>
-            <div class="btn-group btn-group-lg fs-4">
-                <button class="btn btn-outline-light btn-lg border-2 px-5 darkButton" id="startButton"
-                    style="width: 500px; height: 500px;"
-                >
-                    Start <span id="demoName">Lights Demo</span>
+            <div class="btn-group btn-group-lg fs-4 dropup">
+                <button class="btn btn-outline-light btn-lg border-2 px-5 darkButton" id="startButton">
+                    Start <span id="demoName"></span>
                 </button>
                 <button class="dropdown-toggle dropdown-toggle-split btn btn-outline-light btn-lg border-2 darkButton"
                     data-bs-toggle="dropdown">
