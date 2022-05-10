@@ -1,5 +1,4 @@
 import { Vec3 } from "../../lib/TSM";
-import { Hands } from "../render/entity/common/hands/Hands";
 import { AmbientLight } from "../render/entity/common/lights/AmbientLight";
 import { DirectionalLight } from "../render/entity/common/lights/DirectionalLight";
 import { PointLight } from "../render/entity/common/lights/PointLight";
@@ -28,6 +27,8 @@ const setupScene = (): Entity => {
     root.addChildEntity(dirLight);
 
     root.addChildEntity(new Piano());
+
+    // root.addChildEntity(new Hands());
 
     return root;
 };
