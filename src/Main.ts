@@ -9,6 +9,7 @@ import { enforceDefined } from "./utils/Utils";
 import * as Tone from "tone";
 
 const windowany = window as any;
+const startButton = getElement("startButton");
 
 const startXRSession = async () => {
 
@@ -30,6 +31,7 @@ const startXRSession = async () => {
 
     const xrsession = await xr.requestSession("immersive-vr", { requiredFeatures: ["local-floor"], optionalFeatures: ["hand-tracking"] });
     xrsession.addEventListener("end", () => {
+        startButton.removeAttribute("disabled");
         console.log("Session ended");
         baseCanvas.style.display = "none";
     });
@@ -66,10 +68,12 @@ const firstFrame = (_time: number, _frame: XRFrame) => {
 
 const drawFrame = (time: number, frame: XRFrame) => {
     try {
+        time /= 1000.0;
         const scene = getScene();
         const gl = scene.gl;
         scene.frame = frame;
-        scene.update(time / 1000.0);
+        if (time - scene.prevUpdateTime > .05)
+            scene.update(time);
         scene.xrsession.requestAnimationFrame(drawFrame);
 
         const pose = frame.getViewerPose(scene.referenceSpace);
@@ -78,7 +82,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
             const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
 
             gl.bindFramebuffer(gl.FRAMEBUFFER, gllayer.framebuffer);
-            gl.clearColor(0, 0, 0, 1);
+            gl.clearColor(.8, .8, 1, 1);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             
             gl.enable(gl.DEPTH_TEST);
@@ -100,6 +104,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
 };
 
 const init = () => {
+    startButton.setAttribute("disabled", "");
     if (Scene.selectedSceneName.includes("piano")) {
         Tone.start().then(() => {
             Piano.tonejsPiano = new ToneJSPiano({
@@ -132,7 +137,7 @@ const setupPage = () => {
     }
     demoNameElement.innerHTML = ALL_SCENES[0].displayName;
 
-    getElement("startButton").addEventListener("click", init);
+    startButton.addEventListener("click", init);
 
     getElement("mainContainer").classList.remove("d-none");
 };

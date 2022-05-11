@@ -2,7 +2,7 @@ import { Quat, Vec3 } from "../../../../../lib/TSM";
 import { Entity } from "../../Entity";
 import { loadSolid } from "../../solids/Solids";
 import { Hands } from "../hands/Hands";
-import { RenderEntity, useAlbedo } from "../RenderEntity";
+import { RenderEntity, useAlbedo, useFlag } from "../RenderEntity";
 import { Piano as ToneJSPiano } from "@tonejs/piano";
 import { Nullable } from "../../../../utils/Types";
 import { enforceDefined } from "../../../../utils/Utils";
@@ -21,15 +21,27 @@ export class Piano extends Entity {
     private whiteKeys: Array<PianoWhiteKey> = [];
     private blackKeys: Array<PianoBlackKey> = [];
 
+    public keyX = .033; // width of the piano keys
+    public keyZ = 0.15; // length of the piano keys
+    public keyY = 0.02;
+    public bodyXOffset = 0.033;
+    public bottomY = 0.04;
+    public bottomZOffset = 0.05;
+    public backY = 0.10;
+    public backZ = 0.033;
+    public sideX = 0.033;
+    public sideY = 0.07;
+
     constructor() {
         super();
+        this.keysContainer.transform.translate(new Vec3([0, 0, -5 * .03 / 2]));
 
         const whiteKeyNames = ["C", "D", "E", "F", "G", "A", "B"];
         const BLACK_KEY_WI = [0, 1, 3, 4, 5];
         const numOctaves = this.highOctave - this.lowOctave + 1;
         for (let octave = this.lowOctave, i = 0; octave <= this.highOctave; octave++) {
             for (let wi = 0; wi < this.numKeysPerOctave; wi++, i++) {
-                const x = ((i / (numOctaves * this.numKeysPerOctave)) - .5) * (.033 * numOctaves * this.numKeysPerOctave);
+                const x = (((i + 0.5) / (numOctaves * this.numKeysPerOctave)) - 0.5) * (this.keyX * numOctaves * this.numKeysPerOctave);
 
                 const wkey = new PianoWhiteKey(whiteKeyNames[wi] + octave);
                 wkey.transform.applyScale(Vec3.one.copy().scale(.03));
@@ -48,6 +60,35 @@ export class Piano extends Entity {
         }
 
         this.addChildEntity(this.keysContainer);
+
+        const bodyX = this.sideX * 2.0 + (this.keyX * numOctaves * this.numKeysPerOctave);
+
+        const bottom = loadSolid("cube");
+        useAlbedo(bottom, [0.0, 0.0, 0.0, 1.0]);
+        bottom.transform.applyScale(new Vec3([bodyX, this.bottomY, this.keyZ + this.bottomZOffset]));
+        bottom.transform.translate(new Vec3([0, (- this.keyY - this.bottomY) / 2.0 , 0]));
+        this.addChildEntity(bottom);
+
+        const back = loadSolid("cube");
+        useAlbedo(back, [0.0, 0.0, 0.0, 1.0]);
+        back.transform.applyScale(new Vec3([bodyX, this.backY, this.backZ]));
+        back.transform.translate(new Vec3([0, (- this.keyY) / 2.0 - this.bottomY + this.backY / 2.0, -this.keyZ / 2.0 - this.backZ / 2.0]));
+        this.addChildEntity(back);
+        
+        // Left side
+        const left = loadSolid("cube");
+        useAlbedo(left, [0.0, 0.0, 0.0, 1.0]);
+        left.transform.applyScale(new Vec3([this.sideX, this.sideY, this.keyZ + this.bottomZOffset]));
+        left.transform.translate(new Vec3([-bodyX / 2.0 + this.sideX / 2.0, (- this.keyY) / 2.0 - this.bottomY + this.sideY / 2.0, 0]));
+        this.addChildEntity(left);
+
+        // Right side
+        const right = loadSolid("cube");
+        useAlbedo(right, [0.0, 0.0, 0.0, 1.0]);
+        right.transform.applyScale(new Vec3([this.sideX, this.sideY, this.keyZ + this.bottomZOffset]));
+        right.transform.translate(new Vec3([bodyX / 2.0 - this.sideX / 2.0, (- this.keyY) / 2.0 - this.bottomY + this.sideY / 2.0, 0]));
+        this.addChildEntity(right);
+
     }
 }
 
@@ -115,11 +156,11 @@ export class PianoKey extends Entity {
             if (playKey !== Piano.currentKeys.has(this.keyName)) {
                 if (playKey) {
                     Piano.currentKeys.add(this.keyName);
-                    piano.keyDown({ note: this.keyName });
+                    piano.keyDown({ note: this.keyName});
                     this._onKeyDown();
                 } else {
                     Piano.currentKeys.delete(this.keyName);
-                    piano.keyUp({ note: this.keyName });
+                    piano.keyUp({ note: this.keyName, time: "+1" });
                     this._onKeyUp();
                 }
             }

@@ -26,7 +26,7 @@ export class Hands extends Entity {
 
         for (let hi = 0; hi < 2; hi++) {
             for (let i = 0; i < 25; i++) {
-                const joint = loadSolid("sphere", { segments: 3 });
+                const joint = loadSolid("sphere", { segments: 1 });
                 joint.entityData.set("hand", this.handNames[hi]);
                 joint.entityData.set("joint", JOINT_NAMES[i]);
                 joint.transform.scale = Vec3.zero.copy();
@@ -37,7 +37,7 @@ export class Hands extends Entity {
             }
             
             for (let i = 0; i < 24; i++) {
-                const bone = loadSolid("cylinder", { radius: 0.7, height: 1, segments: 20});
+                const bone = loadSolid("cylinder", { radius: 0.7, height: 1, segments: 10});
                 bone.transform.scale = Vec3.zero.copy();
                 useAlbedo(bone, [.7, .7, 1, 1]);
                 useFlag(bone, "lighting");
@@ -72,7 +72,7 @@ export class Hands extends Entity {
                     const joint = this.handJoints[handIndex][i];
                     const transform = new MatTransform();
                     joint.transform = transform;
-                    transform.applyScale(Vec3.one.copy().scale(this.handRadii[handIndex][i]));
+                    transform.applyScale(Vec3.one.copy().scale(1.2 * this.handRadii[handIndex][i]));
                     transform.applyTransform(new Mat4(Array.from(this.handPoses[handIndex].subarray(i * 16, i * 16 + 16))));
                 }
 

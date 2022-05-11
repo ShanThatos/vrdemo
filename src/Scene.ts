@@ -17,6 +17,7 @@ export class Scene {
     private _screenFramebuffer: Nullable<WebGLFramebuffer> = null;
     private _baseEntity: Nullable<BaseEntity> = null;
 
+    public prevUpdateTime = 0;
     public currentTime = 0;
 
     public setup() {
@@ -43,7 +44,6 @@ export class Scene {
         this.baseEntity.render();
     }
 
-    private prevUpdateTime = 0;
     public update(time: number) {
         if (this.prevUpdateTime === 0) {
             this.prevUpdateTime = time;
@@ -53,7 +53,7 @@ export class Scene {
         const dt = (time - this.prevUpdateTime);
         this.prevUpdateTime = time;
 
-        Entity.currentTime = time;
+        this.currentTime = time;
         this.baseEntity.updateEntity(dt);
     }
 

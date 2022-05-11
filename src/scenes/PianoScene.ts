@@ -28,10 +28,10 @@ const setupScene = (): Entity => {
     root.addChildEntity(dirLight);
 
     const piano = new Piano();
-    piano.transform.translate(new Vec3([0, 1.2, -.5]));
+    piano.transform.translate(new Vec3([0, 0.9, -.5]));
     root.addChildEntity(piano);
 
-    root.addChildEntity(new Hands(false));
+    // root.addChildEntity(new Hands(false));
 
     return root;
 };

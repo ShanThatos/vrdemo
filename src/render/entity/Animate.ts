@@ -1,4 +1,5 @@
 import { Quat, Vec3 } from "../../../lib/TSM";
+import { getScene } from "../../Scene";
 import { Entity } from "./Entity";
 
 type AnimateFunction = (e: Entity, time: number, dt: number) => void;
@@ -6,7 +7,7 @@ type AnimateFunction = (e: Entity, time: number, dt: number) => void;
 export const animateEntity = (entity: Entity, animateFunction: AnimateFunction): Entity => {
     const originalUpdateEntity = entity.updateEntity;
     entity.updateEntity = (dt: number) => {
-        animateFunction(entity, Entity.currentTime, dt);
+        animateFunction(entity, getScene().currentTime, dt);
         originalUpdateEntity.call(entity, dt);
     };
     return entity;

@@ -9,7 +9,6 @@ export class Entity {
     public static projectionMatrix: Float32Array = new Float32Array(Mat4.identity.all());
     public static viewMatrix: Float32Array = new Float32Array(Mat4.identity.all());
     public static viewPos: Float32Array = new Float32Array([0, 0, 0]);
-    public static currentTime: number;
     private static entityIdCounter = 0;
 
     public readonly id: number = Entity.entityIdCounter++;
