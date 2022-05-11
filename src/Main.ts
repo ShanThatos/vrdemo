@@ -72,7 +72,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
         const scene = getScene();
         const gl = scene.gl;
         scene.frame = frame;
-        if (time - scene.prevUpdateTime > .05)
+        if (time - scene.prevUpdateTime > .016)
             scene.update(time);
         scene.xrsession.requestAnimationFrame(drawFrame);
 
