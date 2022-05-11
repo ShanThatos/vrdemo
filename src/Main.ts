@@ -1,11 +1,11 @@
 import type { XRFrame, XRReferenceSpace, XRWebGLLayer } from "webxr";
 import { Piano } from "./render/entity/common/piano/Piano";
 import { Piano as ToneJSPiano } from "@tonejs/piano";
-import { getScene, Scene } from "./Scene";
+import { Scene } from "./Scene";
 import { ALL_SCENES, findScene } from "./scenes/SceneLoader";
 import { getElement } from "./utils/DomUtils";
 import type { XRRenderingContext } from "./utils/Types";
-import { enforceDefined } from "./utils/Utils";
+import { getScene, enforceDefined } from "./utils/Utils";
 import * as Tone from "tone";
 
 const windowany = window as any;
@@ -59,11 +59,15 @@ const startXRSession = async () => {
 };
 
 const firstFrame = (_time: number, _frame: XRFrame) => {
-    const scene = getScene();
-    const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
-    scene.screenFramebuffer = gllayer.framebuffer;
-    scene.setup();
-    scene.xrsession.requestAnimationFrame(drawFrame);
+    try {
+        const scene = getScene();
+        const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
+        scene.screenFramebuffer = gllayer.framebuffer;
+        scene.setup();
+        scene.xrsession.requestAnimationFrame(drawFrame);
+    } catch (err) {
+        handleError(err);
+    }
 };
 
 const drawFrame = (time: number, frame: XRFrame) => {
@@ -72,7 +76,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
         const scene = getScene();
         const gl = scene.gl;
         scene.frame = frame;
-        if (time - scene.prevUpdateTime > .05)
+        if (time - scene.prevUpdateTime > .01)
             scene.update(time);
         scene.xrsession.requestAnimationFrame(drawFrame);
 

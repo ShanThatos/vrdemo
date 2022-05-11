@@ -1,6 +1,5 @@
 import { Vec3, Mat4 } from "../../../../../lib/TSM";
-import { getScene } from "../../../../Scene";
-import { enforceDefined, align } from "../../../../utils/Utils";
+import { align, enforceDefined, getScene } from "../../../../utils/Utils";
 import { Entity } from "../../Entity";
 import { loadSolid } from "../../solids/Solids";
 import { MatTransform } from "../../Transform";

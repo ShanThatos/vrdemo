@@ -85,12 +85,12 @@ export class MatTransform extends Transform {
     }
 
 
-    public get position() { throw new Error("uh oh"); }
-    public set position(_value: Vec3) { throw new Error("uh oh"); }
-    public get scale() { throw new Error("uh oh"); }
-    public set scale(_value: Vec3) { throw new Error("uh oh"); }
-    public get rotation() { throw new Error("uh oh"); }
-    public set rotation(_value: Quat) { throw new Error("uh oh"); }
+    public get position() { throw new Error("uh oh1"); }
+    public set position(_value: Vec3) { throw new Error("uh oh2"); }
+    public get scale() { throw new Error("uh oh3"); }
+    public set scale(_value: Vec3) { throw new Error("uh oh4"); }
+    public get rotation() { throw new Error("uh oh5"); }
+    public set rotation(_value: Quat) { throw new Error("uh oh6"); }
 
     public translate(v: Vec3) {
         this._matrix = Mat4.identity.copy().translate(v).multiply(this._matrix);

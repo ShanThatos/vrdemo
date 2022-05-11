@@ -92,5 +92,3 @@ export class Scene {
         return enforceDefined(this._baseEntity);
     }
 }
-
-export const getScene = () => enforceDefined<Scene>((window as any).scene);

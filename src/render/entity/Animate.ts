@@ -1,5 +1,5 @@
 import { Quat, Vec3 } from "../../../lib/TSM";
-import { getScene } from "../../Scene";
+import { getScene } from "../../utils/Utils";
 import { Entity } from "./Entity";
 
 type AnimateFunction = (e: Entity, time: number, dt: number) => void;
