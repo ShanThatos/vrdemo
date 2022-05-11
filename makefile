@@ -22,7 +22,6 @@ build: format
 	npm run build
 
 deploy:
-	-rm -r -Force $(DIST_DIR)
 	$(MAKE) build
 	-git -C $(DIST_DIR) init
 	-git -C $(DIST_DIR) checkout -b main
