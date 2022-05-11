@@ -5,6 +5,9 @@ DIST_DIR := dist
 format:
 	eslint --ext ts --fix src
 
+pull:
+	git pull
+
 m := Updates
 # to use a commit message do: make push m="MESSAGE"
 push:
