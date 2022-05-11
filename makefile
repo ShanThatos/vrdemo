@@ -5,6 +5,9 @@ DIST_DIR := dist
 format:
 	eslint --ext ts --fix src
 
+pull:
+	git pull
+
 m := Updates
 # to use a commit message do: make push m="MESSAGE"
 push:
@@ -19,7 +22,6 @@ build: format
 	npm run build
 
 deploy:
-	-rm -r -Force $(DIST_DIR)
 	$(MAKE) build
 	-git -C $(DIST_DIR) init
 	-git -C $(DIST_DIR) checkout -b main
