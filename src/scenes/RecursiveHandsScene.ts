@@ -26,8 +26,7 @@ const setupScene = (): Entity => {
     const dirLight = new DirectionalLight({ direction: new Vec3([-1, -1, 1]), intensity: 0.5 });
     root.addChildEntity(dirLight);
 
-    root.addChildEntity(new RecursiveHands(1));
-    // root.addChildEntity(new Hand(1));
+    root.addChildEntity(new RecursiveHands());
 
     return root;
 };
