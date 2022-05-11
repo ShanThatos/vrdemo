@@ -2,7 +2,7 @@ import { Quat, Vec3 } from "../../../../../lib/TSM";
 import { Entity } from "../../Entity";
 import { loadSolid } from "../../solids/Solids";
 import { Hands } from "../hands/Hands";
-import { RenderEntity, useAlbedo, useFlag } from "../RenderEntity";
+import { RenderEntity, useAlbedo } from "../RenderEntity";
 import { Piano as ToneJSPiano } from "@tonejs/piano";
 import { Nullable } from "../../../../utils/Types";
 import { enforceDefined } from "../../../../utils/Utils";

@@ -31,7 +31,7 @@ const setupScene = (): Entity => {
     piano.transform.translate(new Vec3([0, 0.9, -.5]));
     root.addChildEntity(piano);
 
-    // root.addChildEntity(new Hands(false));
+    root.addChildEntity(new Hands(false));
 
     return root;
 };
