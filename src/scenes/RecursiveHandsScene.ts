@@ -33,6 +33,6 @@ const setupScene = (): Entity => {
 
 export default {
     name: "RecursiveHands",
-    displayName: "Recursive Hands",
+    displayName: "Handsy Hands",
     load: setupScene
 };

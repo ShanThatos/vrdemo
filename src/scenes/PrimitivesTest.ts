@@ -54,7 +54,7 @@ const setupScene = (): Entity => {
 };
 
 export default {
-    name: "Cylinder",
-    displayName: "Cylinder Demo",
+    name: "primitives",
+    displayName: "Primitives Demo",
     load: setupScene
 };

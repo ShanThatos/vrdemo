@@ -59,6 +59,6 @@ const setupScene = (): Entity => {
 
 export default {
     name: "lights",
-    displayName: "Lights Demo",
+    displayName: "Colored Lights Demo",
     load: setupScene
 };
