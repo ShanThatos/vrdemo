@@ -27,3 +27,6 @@ If you have an oculus quest headset, open up the browser and visit chrome://flag
 - [Hand Tracking Demo](https://youtu.be/HP4NSQZV_FA)
 - [Handsy Hands Demo](https://youtu.be/fEodmbYcrYc)
 - [Piano Demo](https://youtu.be/Fx9BF3J9ffk)
+
+
+<!-- Zip command: zip -r vrdemo.zip lib src .eslintrc.json index.html makefile package.json package-lock.json Presentation.pdf README.md Report.pdf tsconfig.json vite.config.js -->
