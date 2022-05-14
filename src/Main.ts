@@ -8,6 +8,11 @@ import type { XRRenderingContext } from "./utils/Types";
 import { getScene, enforceDefined } from "./utils/Utils";
 import * as Tone from "tone";
 
+window.onload = () => {
+    // Setting up the dropdown menus and click events
+    setupPage();
+};
+
 const windowany = window as any;
 const startButton = getElement("startButton");
 
@@ -55,6 +60,8 @@ const startXRSession = async () => {
     scene.referenceSpace = referenceSpace;
     
     baseCanvas.style.display = "block";
+
+    // Sets up the first frame callback
     xrsession.requestAnimationFrame(firstFrame);
 };
 
@@ -64,6 +71,8 @@ const firstFrame = (_time: number, _frame: XRFrame) => {
         const gllayer = scene.xrsession.renderState.baseLayer as XRWebGLLayer;
         scene.screenFramebuffer = gllayer.framebuffer;
         scene.setup();
+
+        // Sets up the next frame callback
         scene.xrsession.requestAnimationFrame(drawFrame);
     } catch (err) {
         handleError(err);
@@ -76,8 +85,12 @@ const drawFrame = (time: number, frame: XRFrame) => {
         const scene = getScene();
         const gl = scene.gl;
         scene.frame = frame;
+
+        // Physics update for all entities in the scene tree
         if (time - scene.prevUpdateTime > .016)
             scene.update(time);
+
+        // Requests the next frame
         scene.xrsession.requestAnimationFrame(drawFrame);
 
         const pose = frame.getViewerPose(scene.referenceSpace);
@@ -97,6 +110,8 @@ const drawFrame = (time: number, frame: XRFrame) => {
             for (const view of pose.views) {
                 const vp = gllayer.getViewport(view);
                 gl.viewport(vp.x, vp.y, vp.width, vp.height);
+                
+                // Render all entities within the scene tree
                 scene.renderXRViewScene(view);
             }
         } else {
@@ -107,6 +122,7 @@ const drawFrame = (time: number, frame: XRFrame) => {
     }
 };
 
+// Load's up ToneJS if necessary and starts the XR session. 
 const init = () => {
     startButton.setAttribute("disabled", "");
     if (Scene.selectedSceneName.includes("piano")) {
@@ -141,13 +157,10 @@ const setupPage = () => {
     }
     demoNameElement.innerHTML = ALL_SCENES[0].displayName;
 
+    // Call the init function when the start button is clicked
     startButton.addEventListener("click", init);
 
     getElement("mainContainer").classList.remove("d-none");
-};
-
-window.onload = () => {
-    setupPage();
 };
 
 const handleError = (err: any) => {
