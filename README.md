@@ -2,6 +2,9 @@
 # VR Demo 
 ___
 
+### Project Members
+Shanth Koka, Bennett Liu
+
 ### Project Structure
 The project is written in typescript and compiled to an HTML+JS bundle with vite. The core code is in src/ and the entrypoint is Main.ts. Our demo is split up into separate scenes that can be found in src/scenes/. Check out the scenes to get a sense of how the entity component system works. 
 
